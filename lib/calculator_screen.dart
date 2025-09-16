@@ -1,4 +1,5 @@
 import 'package:calculator/buttons_values.dart';
+import 'package:calculator/data/notifiers.dart';
 import 'package:flutter/material.dart';
 
 class CalculatorScreen extends StatefulWidget {
@@ -9,14 +10,29 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
- String number1 =""; // . 0-9
- String operand = ''; // *+-/
- String number2 = ''; // . 0-9
+  String number1 = ""; // . 0-9
+  String operand = ''; // *+-/
+  String number2 = ''; // . 0-9
 
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              darkModeNotifier.value =!darkModeNotifier.value;
+            },
+            icon: ValueListenableBuilder(
+              valueListenable: darkModeNotifier,
+              builder: (context, darkMode, child) {
+                return Icon(darkMode ? Icons.light_mode : Icons.dark_mode);
+              },
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         bottom: false,
         child: Column(
@@ -29,7 +45,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   alignment: Alignment.bottomRight,
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    '$number1$operand$number2'.isEmpty?'0':'$number1$operand$number2' ,
+                    '$number1$operand$number2'.isEmpty
+                        ? '0'
+                        : '$number1$operand$number2',
                     style: const TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -56,9 +74,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 },
               ),
             ),*/
-            Expanded(
-              flex: 2,
-              child: Wrap(
+            Wrap(
                 children: Btn.buttonValues
                     .map(
                       (value) => SizedBox(
@@ -71,7 +87,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     )
                     .toList(),
               ),
-            ),
+            
           ],
         ),
       ),
@@ -99,7 +115,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         clipBehavior: Clip.hardEdge,
         shape: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.white38),
-          borderRadius: BorderRadius.circular(100),
+          borderRadius: BorderRadius.circular(30),
         ),
         child: InkWell(
           onTap: () => onBtnTap(value),
@@ -115,91 +131,91 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   //#####
-  void onBtnTap(String value){
-    if (value == Btn.delete){
+  void onBtnTap(String value) {
+    if (value == Btn.delete) {
       delete();
       return;
     }
 
-    if (value == Btn.clear){
+    if (value == Btn.clear) {
       clearAll();
       return;
-      }
+    }
 
-      if (value== Btn.percent){
-        convertToPercentage();
-        return;
-      }
+    if (value == Btn.percent) {
+      convertToPercentage();
+      return;
+    }
 
-      if( value== Btn.calculate){
-        calculate();
-        return;
-      }
+    if (value == Btn.calculate) {
+      calculate();
+      return;
+    }
 
-     appendValue(value); 
+    appendValue(value);
   }
-//##########
-//calculate the result
-  void calculate(){
-    if(number1.isEmpty) return;
-    if(operand.isEmpty) return;
-    if(number2.isEmpty) return;
-    
+
+  //##########
+  //calculate the result
+  void calculate() {
+    if (number1.isEmpty) return;
+    if (operand.isEmpty) return;
+    if (number2.isEmpty) return;
+
     final double num1 = double.parse(number1);
     final double num2 = double.parse(number2);
-    
+
     var result = 0.0;
     switch (operand) {
       case Btn.add:
-      result = num1 + num2;
+        result = num1 + num2;
         break;
-         case Btn.subtract:
-      result = num1 - num2;
+      case Btn.subtract:
+        result = num1 - num2;
         break;
-        case Btn.multiply:
-      result = num1 * num2;
+      case Btn.multiply:
+        result = num1 * num2;
         break;
-        case Btn.divide:
-      result = num1 / num2;
+      case Btn.divide:
+        result = num1 / num2;
         break;
       default:
     }
     setState(() {
       number1 = '$result';
 
-      if(number1.endsWith('.0')){
-        number1 = number1.substring(0, number1.length -2);
+      if (number1.endsWith('.0')) {
+        number1 = number1.substring(0, number1.length - 2);
       }
 
       operand = '';
       number2 = '';
     });
-    }
+  }
 
   //########
   //convertToPercentage
-  void convertToPercentage(){
+  void convertToPercentage() {
     //ex: 3535+3636
-    if(number1.isNotEmpty&&operand.isNotEmpty&&number2.isNotEmpty){
+    if (number1.isNotEmpty && operand.isNotEmpty && number2.isNotEmpty) {
       // calculate before conversion
       calculate();
-     
     }
-    if(operand.isNotEmpty){
-      //cannot be converted 
-      return; 
+    if (operand.isNotEmpty) {
+      //cannot be converted
+      return;
     }
     final number = double.parse(number1);
     setState(() {
-      number1 = '${(number/100)}';
+      number1 = '${(number / 100)}';
       operand = '';
       number2 = '';
-    }); 
+    });
   }
 
   //########
   //clear all
-  void clearAll(){
+  void clearAll() {
     setState(() {
       number1 = '';
       operand = '';
@@ -209,56 +225,53 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   //########
   //delete from one end
-   void delete (){
-    if (number2.isNotEmpty){
+  void delete() {
+    if (number2.isNotEmpty) {
       // 123 => 12
-      number2 = number2.substring(0, number2.length -1);
-    }else if(operand.isNotEmpty){
-      operand ='';
-    }else if (number1.isNotEmpty){
-      number1 = number1.substring(0, number1.length-1);
+      number2 = number2.substring(0, number2.length - 1);
+    } else if (operand.isNotEmpty) {
+      operand = '';
+    } else if (number1.isNotEmpty) {
+      number1 = number1.substring(0, number1.length - 1);
     }
-    setState(() {
-      
-    });
-   }
+    setState(() {});
+  }
 
   // appends value to the end
-  void appendValue(String value){
+  void appendValue(String value) {
     // if is operand and not '.'
-    if(value != Btn.dot&&int.tryParse(value)==null){
+    if (value != Btn.dot && int.tryParse(value) == null) {
       // operand pressed
-      if(operand.isNotEmpty && number2.isNotEmpty){
+      if (operand.isNotEmpty && number2.isNotEmpty) {
         // TODO calccaulate the equation before assigning new operand
         calculate();
       }
       operand = value;
     }
     // assign value to number1 variable
-    else if(number1.isEmpty || operand.isEmpty){
+    else if (number1.isEmpty || operand.isEmpty) {
       //check if value is'.' | ex: number1 ='1.2'
-      if (value == Btn.dot && number1.contains(Btn.dot))return;
-      if (value == Btn.dot && (number1.isEmpty || number1 ==Btn.n0));{
+      if (value == Btn.dot && number1.contains(Btn.dot)) return;
+      if (value == Btn.dot && (number1.isEmpty || number1 == Btn.n0)) ;
+      {
         // number1='' || '0'
-        
       }
-      number1 +=value;
-      }
+      number1 += value;
+    }
     // assign value to number2 variable
-    else if(number2.isEmpty || operand.isNotEmpty){
+    else if (number2.isEmpty || operand.isNotEmpty) {
       ////check if value is'.' | ex: number2 ='1.2'
-      if (value == Btn.dot && number2.contains(Btn.dot))return;
-      if (value == Btn.dot && (number2.isEmpty || number2 ==Btn.n0));{
+      if (value == Btn.dot && number2.contains(Btn.dot)) return;
+      if (value == Btn.dot && (number2.isEmpty || number2 == Btn.n0)) ;
+      {
         // number1='' || '0'
-         
       }
-      number2 +=value;
-
+      number2 += value;
     }
     setState(() {});
   }
 
-//########
+  //########
   Color getBtnColor(value) {
     return [Btn.clear, Btn.delete].contains(value)
         ? Colors.grey

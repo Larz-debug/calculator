@@ -1,4 +1,5 @@
 import 'package:calculator/calculator_screen.dart';
+import 'package:calculator/data/notifiers.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,12 +12,18 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ValueListenableBuilder(valueListenable: darkModeNotifier, builder: (context, darkMode, child) {
+      return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Calculator',
-      theme: ThemeData.dark(),
+      theme: ThemeData(
+        primaryColor: Colors.black,
+        brightness: darkMode? Brightness.dark : Brightness.light
+      ),
       home: CalculatorScreen(),
 
     );
-  }
+    }
+    );
 }
+    }
